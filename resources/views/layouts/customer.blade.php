@@ -36,7 +36,8 @@
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <h1 class="text-xl font-semibold text-gray-800">Customer Dashboard</h1>
+                            <a href="{{ route('customer.dashboard') }}"
+                                class="text-xl font-semibold text-gray-800">Customer Dashboard</a>
                         </div>
                     </div>
                     <div class="flex items-center space-x-4">

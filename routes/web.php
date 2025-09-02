@@ -4,6 +4,7 @@ use App\Http\Controllers\Customer\Auth\LoginController;
 use App\Http\Controllers\Customer\Auth\RegisterController;
 use App\Http\Controllers\Customer\Auth\SocialAuthController;
 use App\Http\Controllers\Customer\DashboardController;
+use App\Http\Controllers\Customer\InvitationController;
 use Illuminate\Support\Facades\Route;
 
 // Customer Authentication Routes
@@ -19,23 +20,27 @@ Route::prefix('customer')->name('customer.')->group(function () {
         Route::get('register', [RegisterController::class, 'create'])->name('register');
         Route::post('register', [RegisterController::class, 'store'])->name('register.submit');
 
-        // Social Login Routes - PASTIKAN DI LUAR customer.auth middleware
-        // Google Login
+        // Social Login Routes
         Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google');
         Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
-
-        // Untuk social media lainnya (future)
-        Route::get('auth/{provider}', [SocialAuthController::class, 'redirectToProvider'])->name('auth.social');
-        Route::get('auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback'])->name('auth.social.callback');
     });
 
     // Routes untuk authenticated customer - gunakan customer.auth middleware
     Route::middleware('customer.auth')->group(function () {
+        // Dashboard
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
 
-        // Tambahkan routes untuk fitur undangan nanti di sini
-        // Route::resource('invitations', \App\Http\Controllers\Customer\InvitationController::class);
+        // Invitation Management Routes - PASTIKAN ROUTES INI ADA DI DALAM MIDDLEWARE AUTH
+        Route::resource('invitations', InvitationController::class);
+
+        // Additional invitation routes
+        Route::get('invitations/{invitation}/preview', [InvitationController::class, 'preview'])
+            ->name('invitations.preview');
+        Route::post('invitations/{invitation}/publish', [InvitationController::class, 'publish'])
+            ->name('invitations.publish');
+        Route::post('invitations/{invitation}/unpublish', [InvitationController::class, 'unpublish'])
+            ->name('invitations.unpublish');
     });
 });
 

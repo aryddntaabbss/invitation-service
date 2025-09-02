@@ -16,17 +16,17 @@ class DashboardController extends Controller
     {
         $customer = Auth::guard('customer')->user();
 
-        // Get invitations with related data
+        // Get invitations with related data - GUNAKAN PAGINATION
         $invitations = Invitation::with(['package', 'template'])
             ->where('customer_id', $customer->id)
             ->latest()
-            ->get();
+            ->paginate(10); // ← INI YANG DIPERBAIKI
 
         // Calculate statistics
         $stats = [
-            'total_invitations' => $invitations->count(),
-            'active_invitations' => $invitations->where('is_active', true)->count(),
-            'total_views' => $invitations->sum('view_count'),
+            'total_invitations' => $customer->invitations()->count(),
+            'active_invitations' => $customer->invitations()->where('is_active', true)->count(),
+            'total_views' => $customer->invitations()->sum('view_count'),
         ];
 
         return view('customer.dashboard', compact('customer', 'invitations', 'stats'));

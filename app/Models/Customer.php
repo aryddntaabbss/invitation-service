@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Customer extends Authenticatable
 {
@@ -45,17 +46,22 @@ class Customer extends Authenticatable
     /**
      * Relationship dengan invitations
      */
+    // public function invitations(): HasMany
+    // {
+    //     return $this->hasMany(Invitation::class, 'customer_id');
+    // }
+
     public function invitations()
     {
-        return $this->hasMany(Invitation::class);
+        return $this->hasMany(Invitation::class, 'customer_id');
     }
 
     /**
      * Relationship dengan transactions
      */
-    public function transactions()
+    public function transactions(): HasMany
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(Transaction::class, 'customer_id');
     }
 
     /**
@@ -63,7 +69,7 @@ class Customer extends Authenticatable
      */
     public function guests()
     {
-        return $this->hasManyThrough(Guest::class, Invitation::class);
+        return $this->hasManyThrough(Guest::class, Invitation::class, 'customer_id', 'invitation_id');
     }
 
     /**
@@ -94,5 +100,24 @@ class Customer extends Authenticatable
             ->where('is_active', true)
             ->where('expires_at', '>', now())
             ->count();
+    }
+
+    /**
+     * Get total views semua undangan customer
+     */
+    public function getTotalViewsAttribute()
+    {
+        return $this->invitations()->sum('view_count');
+    }
+
+    /**
+     * Check jika customer memiliki undangan aktif
+     */
+    public function hasActiveInvitations(): bool
+    {
+        return $this->invitations()
+            ->where('is_active', true)
+            ->where('expires_at', '>', now())
+            ->exists();
     }
 }
